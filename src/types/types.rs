@@ -587,7 +587,6 @@ pub struct Metadata {
 
 #[derive(Serialize, Debug)]
 pub struct Attribute {
-    #[serde(alias = "trait_value")]
     pub value: Value,
     pub trait_type: String,
 }
