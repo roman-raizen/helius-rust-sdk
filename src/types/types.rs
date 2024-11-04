@@ -4,7 +4,7 @@ use super::{
     TransactionStatus, TransactionType, UiTransactionEncoding, WebhookType,
 };
 use crate::types::{DisplayOptions, GetAssetOptions};
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 use serde_json::Value;
 use std::time::Duration;
 
@@ -585,11 +585,47 @@ pub struct Metadata {
     pub symbol: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Debug)]
 pub struct Attribute {
     #[serde(alias = "trait_value")]
     pub value: Value,
     pub trait_type: String,
+}
+
+impl<'de> Deserialize<'de> for Attribute {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        #[derive(Deserialize)]
+        struct RawAttribute {
+            value: Option<Value>,
+            trait_value: Option<Value>,
+            trait_type: Option<String>,
+        }
+
+        let raw = RawAttribute::deserialize(deserializer)?;
+
+        // Determine the final value by handling both `value` and `trait_value`
+        let final_value = match (raw.value, raw.trait_value) {
+            (Some(v), Some(tv)) if v == tv => v, // If both exist and are equal, use either
+            (Some(v), None) | (None, Some(v)) => v, // Use whichever exists
+            (Some(_), Some(_)) => {
+                return Err(serde::de::Error::custom("Mismatched `value` and `trait_value`"))
+            } // Error on mismatch
+            (None, None) => {
+                return Err(serde::de::Error::missing_field("value"))
+            } // Error if neither exists
+        };
+
+        // Ensure `trait_type` is present
+        let final_trait_type = raw.trait_type.ok_or_else(|| serde::de::Error::missing_field("trait_type"))?;
+
+        Ok(Attribute {
+            value: final_value,
+            trait_type: final_trait_type,
+        })
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
