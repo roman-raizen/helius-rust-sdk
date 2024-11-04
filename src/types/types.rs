@@ -8,6 +8,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::time::Duration;
 
+use crate::utils::deserialize_optional_attributes;
+
 use solana_client::rpc_config::RpcSendTransactionConfig;
 use solana_sdk::{address_lookup_table::AddressLookupTableAccount, instruction::Instruction, signature::Signer};
 
@@ -576,6 +578,7 @@ pub struct FileQuality {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Metadata {
+    #[serde(default, deserialize_with = "deserialize_optional_attributes")]
     pub attributes: Option<Vec<Attribute>>,
     pub description: Option<String>,
     pub name: Option<String>,
