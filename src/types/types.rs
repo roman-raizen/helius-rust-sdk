@@ -605,20 +605,33 @@ impl<'de> Deserialize<'de> for Attribute {
 
         let raw = RawAttribute::deserialize(deserializer)?;
 
+        // Function to replace `Value::Null` with an empty `Value::String`
+        fn handle_null(value: Option<Value>) -> Option<Value> {
+            match value {
+                Some(Value::Null) => Some(Value::String(String::new())),
+                other => other,
+            }
+        }
+
+        // Apply the function to `value` and `trait_value`
+        let value = handle_null(raw.value);
+        let trait_value = handle_null(raw.trait_value);
+
         // Determine the final value by handling both `value` and `trait_value`
-        let final_value = match (raw.value, raw.trait_value) {
+        let final_value = match (value, trait_value) {
             (Some(v), Some(tv)) if v == tv => v, // If both exist and are equal, use either
             (Some(v), None) | (None, Some(v)) => v, // Use whichever exists
             (Some(_), Some(_)) => {
                 return Err(serde::de::Error::custom("Mismatched `value` and `trait_value`"))
             } // Error on mismatch
             (None, None) => {
-                return Err(serde::de::Error::missing_field("value"))
-            } // Error if neither exists
+              return Err(serde::de::Error::missing_field("value"))
+            }
         };
 
         // Ensure `trait_type` is present
-        let final_trait_type = raw.trait_type.ok_or_else(|| serde::de::Error::missing_field("trait_type"))?;
+        let final_trait_type =
+            raw.trait_type.ok_or_else(|| serde::de::Error::missing_field("trait_type"))?;
 
         Ok(Attribute {
             value: final_value,
@@ -626,6 +639,7 @@ impl<'de> Deserialize<'de> for Attribute {
         })
     }
 }
+
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Links {
