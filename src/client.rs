@@ -98,14 +98,14 @@ impl Helius {
     /// # Returns
     /// An instance of `Helius` if successful. A `HeliusError` is returned if an error occurs during configuration or initialization of the HTTP, RPC, or WS client
     pub async fn new_with_ws(api_key: &str, cluster: Cluster) -> Result<Self> {
-        log::debug("Creating config");
+        log::debug!("Creating config");
         let config: Arc<Config> = Arc::new(Config::new(api_key, cluster)?);
-        log::debug("Creating client");
+        log::debug!("Creating client");
         let client: Client = Client::builder().build().map_err(HeliusError::ReqwestError)?;
-        log::debug("Creating rpc client");
+        log::debug!("Creating rpc client");
         let rpc_client: Arc<RpcClient> = Arc::new(RpcClient::new(Arc::new(client.clone()), config.clone())?);
         let wss: String = format!("{}{}", ENHANCED_WEBSOCKET_URL, api_key);
-        log::debug("Creating enhanced ws client");
+        log::debug!("Creating enhanced ws client");
         let ws_client: Arc<EnhancedWebsocket> = Arc::new(EnhancedWebsocket::new(&wss).await?);
 
         Ok(Helius {
