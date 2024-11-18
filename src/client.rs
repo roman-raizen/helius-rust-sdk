@@ -104,7 +104,7 @@ impl Helius {
         let client: Client = Client::builder().build().map_err(HeliusError::ReqwestError)?;
         log::debug!("Creating rpc client");
         let rpc_client: Arc<RpcClient> = Arc::new(RpcClient::new(Arc::new(client.clone()), config.clone())?);
-        let wss: String = format!("{}/{}", ENHANCED_WEBSOCKET_URL, api_key);
+        let wss: String = format!("{}{}", ENHANCED_WEBSOCKET_URL, api_key);
         log::debug!("Creating enhanced ws client");
         let ws_client: Arc<EnhancedWebsocket> = Arc::new(EnhancedWebsocket::new(&wss).await?);
         log::debug!("Init done");
