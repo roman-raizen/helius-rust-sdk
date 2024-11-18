@@ -1,6 +1,6 @@
 [package]
 name = "helius"
-version = "0.2.217"
+version = "0.2.218"
 edition = "2021"
 description = "An asynchronous Helius Rust SDK for building the future of Solana"
 keywords = ["helius", "solana", "asynchronous-sdk", "das", "cryptocurrency"]
@@ -40,6 +40,7 @@ tokio-stream = "0.1.15"
 tokio-tungstenite = { version = "0.24.0", features = ["native-tls", "handshake"] }
 url = "2.5.0"
 spl-token = { version = "4.0.0", features = ["no-entrypoint"] }
+log = "0.4.22"
 
 [dev-dependencies]
 mockito = "1.4.0"
