@@ -54,6 +54,7 @@ impl EnhancedWebsocket {
     /// Expects enhanced websocket endpoint: wss://atlas-mainnet.helius-rpc.com?api-key=<API_KEY>
     pub async fn new(url: &str) -> Result<Self> {
         log::debug!("Connecting to ws url: {}", url);
+
         let (ws, _response) = connect_async(url).await.map_err(HeliusError::Tungstenite)?;
 
         let (subscribe_sender, subscribe_receiver) = mpsc::unbounded_channel();
